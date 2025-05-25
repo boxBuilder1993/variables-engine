@@ -12,6 +12,30 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - variables_engine_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  flyway:
+    image: flyway/flyway
+    container_name: variables_engine_migrations
+    volumes:
+      - ../migrations:/flyway/sql
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://db:5432/${POSTGRES_DB:-variables_engine}
+      - FLYWAY_USER=${POSTGRES_USER:-postgres}
+      - FLYWAY_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - FLYWAY_CONNECT_RETRIES=10
+      - FLYWAY_SCHEMAS=public
+      - FLYWAY_GROUP=true
+    command: migrate
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - variables_engine_network
 
   app:
     build:
@@ -27,7 +51,7 @@ services:
     volumes:
       - ..:/app
     depends_on:
-      - db
+      - flyway
     networks:
       - variables_engine_network
 
