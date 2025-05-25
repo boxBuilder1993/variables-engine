@@ -9,7 +9,7 @@ dependencies = [
     "hatchling>=1.27.0",
     "pandas>=2.2.3",
     "pydantic>=2.11.5",
-    "dotenv"
+    "dotenv",
 ]
 
 [build-system]
