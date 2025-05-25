@@ -1,0 +1,11 @@
+services:
+  test-runner:
+    build:
+      context: ..
+      dockerfile: docker/test.Dockerfile
+    container_name: variables-engine-test-runner
+    volumes:
+      - ..:/app
+    environment:
+      - PYTHONPATH=/app/src:/app/tests
+    command: ["uv", "run", "pytest", "-xvs", "/app/tests"]
