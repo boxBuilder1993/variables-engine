@@ -63,7 +63,7 @@ CREATE TABLE variable_values (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    CONSTRAINT unique_variable_entity_context UNIQUE (variable_id, entity_instance_id)
+    CONSTRAINT unique_variable_instance UNIQUE (variable_id, entity_instance_id)
 );
 
 -- Add function to verify entity instance exists before inserting variable value
