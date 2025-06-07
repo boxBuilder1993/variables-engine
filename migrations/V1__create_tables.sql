@@ -28,12 +28,10 @@ CREATE TABLE entity_values (
     id SERIAL PRIMARY KEY,
     entity_id VARCHAR(50) NOT NULL REFERENCES entities(id),
     instance_id VARCHAR(255) NOT NULL,
-    name VARCHAR(255),
     metadata JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    -- Each entity instance ID must be unique per entity
     CONSTRAINT unique_entity_instance UNIQUE (entity_id, instance_id)
 );
 
@@ -42,11 +40,10 @@ CREATE TABLE variables (
     id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     entity_id VARCHAR(50) NOT NULL REFERENCES entities(id),
-    project_id VARCHAR(50) NOT NULL REFERENCES projects(id),
     is_input BOOLEAN NOT NULL DEFAULT true,
-    is_persisted BOOLEAN,
+    is_persisted BOOLEAN DEFAULT false,
     function_name VARCHAR(255),
-    input_variables JSONB,  -- Store input variable IDs as a JSON array
+    metadata JSONB,
     description TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -66,7 +63,7 @@ CREATE TABLE variable_values (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     
-    CONSTRAINT unique_variable_entity_context UNIQUE (variable_id, entity_instance_id, context)
+    CONSTRAINT unique_variable_entity_context UNIQUE (variable_id, entity_instance_id)
 );
 
 -- Add function to verify entity instance exists before inserting variable value

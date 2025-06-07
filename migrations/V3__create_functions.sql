@@ -43,47 +43,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Function to add an input variable dependency
-CREATE OR REPLACE FUNCTION add_input_variable(
-    variable_id VARCHAR(50),
-    input_variable_id VARCHAR(50)
-)
-RETURNS VOID AS $$
-DECLARE
-    current_inputs JSONB;
-BEGIN
-    -- Get current input variables
-    SELECT input_variables INTO current_inputs FROM variables WHERE id = variable_id;
-
-    -- Initialize as empty array if null
-    IF current_inputs IS NULL THEN
-        current_inputs := '[]'::JSONB;
-    END IF;
-
-    -- Add new input variable if not already present
-    IF NOT current_inputs @> jsonb_build_array(input_variable_id) THEN
-        UPDATE variables
-        SET input_variables = current_inputs || jsonb_build_array(input_variable_id)
-        WHERE id = variable_id;
-    END IF;
-END;
-$$ LANGUAGE plpgsql;
-
--- Function to get all input variables for a given variable
-CREATE OR REPLACE FUNCTION get_input_variables(variable_id VARCHAR(50))
-RETURNS TABLE(id VARCHAR(50), name VARCHAR(255)) AS $$
-BEGIN
-    RETURN QUERY
-    SELECT v.id, v.name
-    FROM variables v
-    WHERE v.id = ANY(
-        SELECT jsonb_array_elements_text(input_variables)
-        FROM variables
-        WHERE id = variable_id
-    );
-END;
-$$ LANGUAGE plpgsql;
-
 -- Function to upsert variable value
 CREATE OR REPLACE FUNCTION upsert_variable_value(
     p_variable_id VARCHAR(50),
