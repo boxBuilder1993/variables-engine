@@ -10,76 +10,34 @@ class TestEngine:
     @pytest.fixture
     def sample_project(self):
         """Create a sample project with entities and variables for testing."""
-        entity1 = Entity(id="entity1", name="Customer")
-        entity2 = Entity(id="entity2", name="Order")
-        
-        variables = [
-            # Input variables
-            Variable(
-                id="var1", 
-                name="age", 
-                entity_id="entity1", 
-                is_input=True,
-                function_name=None,
-                input_variables=[]
-            ),
-            Variable(
-                id="var2", 
-                name="income", 
-                entity_id="entity1", 
-                is_input=True,
-                function_name=None,
-                input_variables=[]
-            ),
-            # Derived variables
-            Variable(
-                id="var3", 
-                name="is_adult", 
-                entity_id="entity1", 
-                is_input=False,
-                function_name="check_adult",
-                input_variables=["age"]
-            ),
-            Variable(
-                id="var4", 
-                name="credit_score", 
-                entity_id="entity1", 
-                is_input=False,
-                function_name="calculate_credit_score",
-                input_variables=["age", "income"]
-            ),
-            # Order entity variables
-            Variable(
-                id="var5", 
-                name="amount", 
-                entity_id="entity2", 
-                is_input=True,
-                function_name=None,
-                input_variables=[]
-            ),
-            Variable(
-                id="var6", 
-                name="tax", 
-                entity_id="entity2", 
-                is_input=False,
-                function_name="calculate_tax",
-                input_variables=["amount"]
-            ),
+        # Create test entities
+        entities = [
+            Entity(id="entity1", name="Customer"),
+            Entity(id="entity2", name="Order")
         ]
         
-        return Project(id="project1", name="Test Project", entities=[entity1, entity2], variables=variables)
+        # Create test variables
+        variables = [
+            Variable(id="var1", name="age", entity_id="entity1", is_input=True, function_name=None, metadata={}),
+            Variable(id="var2", name="income", entity_id="entity1", is_input=True, function_name=None, metadata={}),
+            Variable(id="var3", name="is_adult", entity_id="entity1", is_input=False, function_name="check_adult", metadata={"input_variables": ["age"]}),
+            Variable(id="var4", name="credit_score", entity_id="entity1", is_input=False, function_name="calculate_credit", metadata={"input_variables": ["age", "income"]}),
+            Variable(id="var5", name="amount", entity_id="entity2", is_input=True, function_name=None, metadata={}),
+            Variable(id="var6", name="tax", entity_id="entity2", is_input=False, function_name="calculate_tax", metadata={"input_variables": ["amount"]})
+        ]
+        
+        return Project(id="project1", name="Test Project", entities=entities, variables=variables)
     
     @pytest.fixture
     def engine_with_functions(self):
         """Create an engine with mock functions in registry."""
         engine = Engine()
         
-        # Add mock functions to registry
-        engine.function_registry = {
-            "check_adult": lambda age: age >= 18 if age is not None else None,
-            "calculate_credit_score": lambda age, income: (age * 10 + income / 1000) if age is not None and income is not None else None,
-            "calculate_tax": lambda amount: amount * 0.1 if amount is not None else None
-        }
+        # Register test functions
+        engine.function_registry["check_adult"] = lambda age: age >= 18
+        engine.function_registry["calculate_credit"] = lambda age, income: (age * 10) + (income / 1000)
+        engine.function_registry["calculate_tax"] = lambda amount: amount * 0.1
+        engine.function_registry["add_one"] = lambda x: x + 1
         
         return engine
     
@@ -192,10 +150,10 @@ class TestEngine:
         # Create a project with a chain of dependent variables
         entity = Entity(id="entity1", name="Test")
         variables = [
-            Variable(id="var1", name="input1", entity_id="entity1", is_input=True, function_name=None, input_variables=[]),
-            Variable(id="var2", name="level1", entity_id="entity1", is_input=False, function_name="add_one", input_variables=["input1"]),
-            Variable(id="var3", name="level2", entity_id="entity1", is_input=False, function_name="add_one", input_variables=["level1"]),
-            Variable(id="var4", name="level3", entity_id="entity1", is_input=False, function_name="add_one", input_variables=["level2"]),
+            Variable(id="var1", name="input1", entity_id="entity1", is_input=True, function_name=None, metadata={}),
+            Variable(id="var2", name="level1", entity_id="entity1", is_input=False, function_name="add_one", metadata={"input_variables": ["input1"]}),
+            Variable(id="var3", name="level2", entity_id="entity1", is_input=False, function_name="add_one", metadata={"input_variables": ["level1"]}),
+            Variable(id="var4", name="level3", entity_id="entity1", is_input=False, function_name="add_one", metadata={"input_variables": ["level2"]}),
         ]
         
         project = Project(id="project1", name="Test", entities=[entity], variables=variables)
